@@ -1,0 +1,38 @@
+{
+  "name": "jenkins-ui-demo",
+  "version": "1.0.0",
+  "description": "Mini projet Node/Vite pour TP Jenkins + SonarQube + Nexus",
+  "type": "module",
+  "engines": {
+    "node": ">=20 <23"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ci": "vitest run --coverage --reporter=verbose",
+    "ci": "npm run test:ci && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LouisHM/premierProjetFreestyleJenkins.git"
+  },
+  "keywords": [
+    "jenkins",
+    "sonarqube",
+    "nexus",
+    "vite"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LouisHM/premierProjetFreestyleJenkins/issues"
+  },
+  "homepage": "https://github.com/LouisHM/premierProjetFreestyleJenkins#readme",
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
+    "vite": "^7.1.3",
+    "vitest": "^4.0.18"
+  }
+}
