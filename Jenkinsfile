@@ -85,23 +85,25 @@ pipeline {
           }
 
           withSonarQubeEnv("${SONAR_INSTANCE}") {
-            sh """
-              set -eu
-              export PATH="$NODE_FALLBACK_PATH:$PATH"
+            withEnv(["SCANNER_HOME=${scannerHome}"]) {
+              sh '''
+                set -eu
+                export PATH="$NODE_FALLBACK_PATH:$PATH"
 
-              if [ -n "${scannerHome}" ] && [ -x "${scannerHome}/bin/sonar-scanner" ]; then
-                SCANNER_CMD="${scannerHome}/bin/sonar-scanner"
-              elif command -v sonar-scanner >/dev/null 2>&1; then
-                SCANNER_CMD="$(command -v sonar-scanner)"
-              else
-                echo "ERROR: sonar-scanner introuvable."
-                echo "Configure un outil Jenkins 'sonar-scanner' ou installe sonar-scanner sur l'agent Jenkins."
-                exit 127
-              fi
+                if [ -n "$SCANNER_HOME" ] && [ -x "$SCANNER_HOME/bin/sonar-scanner" ]; then
+                  SCANNER_CMD="$SCANNER_HOME/bin/sonar-scanner"
+                elif command -v sonar-scanner >/dev/null 2>&1; then
+                  SCANNER_CMD="$(command -v sonar-scanner)"
+                else
+                  echo "ERROR: sonar-scanner introuvable."
+                  echo "Configure un outil Jenkins 'sonar-scanner' ou installe sonar-scanner sur l'agent Jenkins."
+                  exit 127
+                fi
 
-              echo "Sonar scanner binary: \$SCANNER_CMD"
-              "\$SCANNER_CMD"
-            """
+                echo "Sonar scanner binary: $SCANNER_CMD"
+                "$SCANNER_CMD"
+              '''
+            }
           }
         }
       }
