@@ -1,6 +1,10 @@
 pipeline {
   agent any
 
+  tools {
+    nodejs 'nodejs'
+  }
+
   environment {
     SONAR_INSTANCE = 'sonarqube-local'
     NEXUS_URL = 'localhost:8081'
@@ -13,6 +17,31 @@ pipeline {
     stage('Checkout') {
       steps {
         checkout scm
+      }
+    }
+
+    stage('Validate Toolchain') {
+      steps {
+        sh '''
+          set -eu
+
+          if ! command -v node >/dev/null 2>&1; then
+            echo "ERROR: node not found in PATH."
+            echo "Configure Manage Jenkins > Tools > NodeJS installations with the exact name: nodejs"
+            exit 127
+          fi
+
+          if ! command -v npm >/dev/null 2>&1; then
+            echo "ERROR: npm not found in PATH."
+            echo "Configure Manage Jenkins > Tools > NodeJS installations with the exact name: nodejs"
+            exit 127
+          fi
+
+          echo "Node version: $(node -v)"
+          echo "npm version: $(npm -v)"
+
+          node -e "const [major, minor] = process.versions.node.split('.').map(Number); const supported = (major === 20 && minor >= 19) || (major === 22 && minor >= 12); if (!supported) { console.error('ERROR: Node.js 20.19+ or 22.12+ is required for this project.'); process.exit(1); }"
+        '''
       }
     }
 

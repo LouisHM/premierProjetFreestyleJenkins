@@ -6,7 +6,7 @@ Projet de demo pour un premier job Jenkins:
 - Analyse SonarQube
 - Publication d un package `.tgz` dans Nexus
 
-Prerequis local: Node.js 20 (fichier `.nvmrc` fourni).
+Prerequis local: Node.js `20.19+` ou `22.12+`.
 
 ## 1) Lancer en local
 
@@ -53,11 +53,15 @@ Ce repo contient un `Jenkinsfile` a la racine. Le pipeline fait:
 ### Prerequis Jenkins (important)
 
 Configurer dans Jenkins:
-- Plugins: `Git`, `Pipeline`, `SonarQube Scanner`, `Nexus Artifact Uploader`
+- Plugins: `Git`, `Pipeline`, `NodeJS`, `SonarQube Scanner`, `Nexus Artifact Uploader`
+- Outil NodeJS: creer une installation nommee exactement `nodejs`
+- Version Node recommandee pour cet outil: `22.x` ou `20.19+`
 - SonarQube server name: `sonarqube-local`
 - Sonar scanner tool name: `sonar-scanner`
 - Credentials Nexus id: `nexus-credentials`
 - Un repo Nexus `raw-hosted` (ou adapter `NEXUS_REPOSITORY` dans `Jenkinsfile`)
+
+Le pipeline contient maintenant une etape `Validate Toolchain` qui echoue clairement si `node` ou `npm` ne sont pas disponibles sur l agent Jenkins.
 
 ## 4) Variables a adapter dans Jenkinsfile
 
