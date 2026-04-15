@@ -1,16 +1,13 @@
 pipeline {
   agent any
 
-  tools {
-    nodejs 'nodejs'
-  }
-
   environment {
     SONAR_INSTANCE = 'sonarqube-local'
     NEXUS_URL = 'localhost:8081'
     NEXUS_REPOSITORY = 'raw-hosted'
     NEXUS_CREDENTIALS = 'nexus-credentials'
     APP_GROUP = 'fr.efrei.devops'
+    NODE_FALLBACK_PATH = '/opt/homebrew/bin:/usr/local/bin:/opt/homebrew/opt/node@22/bin:/usr/local/opt/node@22/bin:/opt/homebrew/opt/node@20/bin:/usr/local/opt/node@20/bin'
   }
 
   stages {
@@ -24,16 +21,19 @@ pipeline {
       steps {
         sh '''
           set -eu
+          export PATH="$NODE_FALLBACK_PATH:$PATH"
 
           if ! command -v node >/dev/null 2>&1; then
             echo "ERROR: node not found in PATH."
-            echo "Configure Manage Jenkins > Tools > NodeJS installations with the exact name: nodejs"
+            echo "Install Node.js 20.19+ or 22.12+ on the Jenkins machine."
+            echo "Expected PATH locations already checked: $NODE_FALLBACK_PATH"
             exit 127
           fi
 
           if ! command -v npm >/dev/null 2>&1; then
             echo "ERROR: npm not found in PATH."
-            echo "Configure Manage Jenkins > Tools > NodeJS installations with the exact name: nodejs"
+            echo "Install Node.js 20.19+ or 22.12+ on the Jenkins machine."
+            echo "Expected PATH locations already checked: $NODE_FALLBACK_PATH"
             exit 127
           fi
 
@@ -47,19 +47,28 @@ pipeline {
 
     stage('Install') {
       steps {
-        sh 'npm ci'
+        sh '''
+          export PATH="$NODE_FALLBACK_PATH:$PATH"
+          npm ci
+        '''
       }
     }
 
     stage('Test') {
       steps {
-        sh 'npm run test:ci'
+        sh '''
+          export PATH="$NODE_FALLBACK_PATH:$PATH"
+          npm run test:ci
+        '''
       }
     }
 
     stage('Build') {
       steps {
-        sh 'npm run build'
+        sh '''
+          export PATH="$NODE_FALLBACK_PATH:$PATH"
+          npm run build
+        '''
       }
     }
 
@@ -94,10 +103,15 @@ pipeline {
       steps {
         script {
           env.APP_VERSION = sh(
-            script: "node -e \"console.log(JSON.parse(require('fs').readFileSync('package.json','utf8')).version)\"",
+            script: '''export PATH="$NODE_FALLBACK_PATH:$PATH"
+node -e "console.log(JSON.parse(require('fs').readFileSync('package.json','utf8')).version)"''',
             returnStdout: true
           ).trim()
-          env.PACKAGE_FILE = sh(script: 'npm pack', returnStdout: true).trim()
+          env.PACKAGE_FILE = sh(
+            script: '''export PATH="$NODE_FALLBACK_PATH:$PATH"
+npm pack''',
+            returnStdout: true
+          ).trim()
         }
       }
     }

@@ -53,15 +53,17 @@ Ce repo contient un `Jenkinsfile` a la racine. Le pipeline fait:
 ### Prerequis Jenkins (important)
 
 Configurer dans Jenkins:
-- Plugins: `Git`, `Pipeline`, `NodeJS`, `SonarQube Scanner`, `Nexus Artifact Uploader`
-- Outil NodeJS: creer une installation nommee exactement `nodejs`
-- Version Node recommandee pour cet outil: `22.x` ou `20.19+`
+- Plugins: `Git`, `Pipeline`, `SonarQube Scanner`, `Nexus Artifact Uploader`
+- Installer Node.js directement sur la machine Jenkins: `22.x` recommande, ou `20.19+`
+- Le pipeline ajoute deja ces chemins au `PATH`: `/opt/homebrew/bin`, `/usr/local/bin`, `.../node@22/bin`, `.../node@20/bin`
 - SonarQube server name: `sonarqube-local`
 - Sonar scanner tool name: `sonar-scanner`
 - Credentials Nexus id: `nexus-credentials`
 - Un repo Nexus `raw-hosted` (ou adapter `NEXUS_REPOSITORY` dans `Jenkinsfile`)
 
 Le pipeline contient maintenant une etape `Validate Toolchain` qui echoue clairement si `node` ou `npm` ne sont pas disponibles sur l agent Jenkins.
+
+Si tu veux absolument utiliser le plugin Jenkins `NodeJS`, il faut le plugin correspondant et il faudra reintroduire cette configuration dans le `Jenkinsfile`. Dans l etat actuel, le pipeline n en depend plus.
 
 ## 4) Variables a adapter dans Jenkinsfile
 
