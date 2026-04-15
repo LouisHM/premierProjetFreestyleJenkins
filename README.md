@@ -57,7 +57,8 @@ Configurer dans Jenkins:
 - Installer Node.js directement sur la machine Jenkins: `24.x` ou `22.x` recommande, `20.19+` acceptable
 - Le pipeline ajoute deja ces chemins au `PATH` en priorite: `.../node@24/bin`, `.../node@22/bin`, `.../node@20/bin`, puis `/opt/homebrew/bin` et `/usr/local/bin`
 - SonarQube server name: `sonarqube-local`
-- Sonar scanner tool name: `sonar-scanner`
+- Option A: configurer un outil Jenkins SonarScanner nomme `sonar-scanner`
+- Option B: installer `sonar-scanner` directement sur la machine Jenkins et le laisser accessible dans le `PATH`
 - Credentials Nexus id: `nexus-credentials`
 - Un repo Nexus `raw-hosted` (ou adapter `NEXUS_REPOSITORY` dans `Jenkinsfile`)
 

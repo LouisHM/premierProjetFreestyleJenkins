@@ -77,16 +77,30 @@ pipeline {
     stage('SonarQube Analysis') {
       steps {
         script {
-          def scannerHome = tool 'sonar-scanner'
+          def scannerHome = ''
+          try {
+            scannerHome = tool name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+          } catch (Exception err) {
+            echo "Sonar scanner Jenkins tool 'sonar-scanner' unavailable: ${err.message}"
+          }
+
           withSonarQubeEnv("${SONAR_INSTANCE}") {
             sh """
-              ${scannerHome}/bin/sonar-scanner \\
-                -Dsonar.projectKey=tp1-jenkins-node-ui \\
-                -Dsonar.projectName='TP1 Jenkins Node UI' \\
-                -Dsonar.sources=src \\
-                -Dsonar.tests=src \\
-                -Dsonar.test.inclusions='src/**/*.test.js' \\
-                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+              set -eu
+              export PATH="$NODE_FALLBACK_PATH:$PATH"
+
+              if [ -n "${scannerHome}" ] && [ -x "${scannerHome}/bin/sonar-scanner" ]; then
+                SCANNER_CMD="${scannerHome}/bin/sonar-scanner"
+              elif command -v sonar-scanner >/dev/null 2>&1; then
+                SCANNER_CMD="$(command -v sonar-scanner)"
+              else
+                echo "ERROR: sonar-scanner introuvable."
+                echo "Configure un outil Jenkins 'sonar-scanner' ou installe sonar-scanner sur l'agent Jenkins."
+                exit 127
+              fi
+
+              echo "Sonar scanner binary: \$SCANNER_CMD"
+              "\$SCANNER_CMD"
             """
           }
         }
