@@ -6,7 +6,7 @@ Projet de demo pour un premier job Jenkins:
 - Analyse SonarQube
 - Publication d un package `.tgz` dans Nexus
 
-Prerequis local: Node.js `20.19+` ou `22.12+`.
+Prerequis local: Node.js `20.19+`, `22.12+`, ou `24+`.
 
 ## 1) Lancer en local
 
@@ -54,14 +54,14 @@ Ce repo contient un `Jenkinsfile` a la racine. Le pipeline fait:
 
 Configurer dans Jenkins:
 - Plugins: `Git`, `Pipeline`, `SonarQube Scanner`, `Nexus Artifact Uploader`
-- Installer Node.js directement sur la machine Jenkins: `22.x` recommande, ou `20.19+`
-- Le pipeline ajoute deja ces chemins au `PATH`: `/opt/homebrew/bin`, `/usr/local/bin`, `.../node@22/bin`, `.../node@20/bin`
+- Installer Node.js directement sur la machine Jenkins: `24.x` ou `22.x` recommande, `20.19+` acceptable
+- Le pipeline ajoute deja ces chemins au `PATH` en priorite: `.../node@24/bin`, `.../node@22/bin`, `.../node@20/bin`, puis `/opt/homebrew/bin` et `/usr/local/bin`
 - SonarQube server name: `sonarqube-local`
 - Sonar scanner tool name: `sonar-scanner`
 - Credentials Nexus id: `nexus-credentials`
 - Un repo Nexus `raw-hosted` (ou adapter `NEXUS_REPOSITORY` dans `Jenkinsfile`)
 
-Le pipeline contient maintenant une etape `Validate Toolchain` qui echoue clairement si `node` ou `npm` ne sont pas disponibles sur l agent Jenkins.
+Le pipeline contient maintenant une etape `Validate Toolchain` qui echoue clairement si `node` ou `npm` ne sont pas disponibles sur l agent Jenkins, ou si Jenkins utilise une version non supportee comme `Node 23`.
 
 Si tu veux absolument utiliser le plugin Jenkins `NodeJS`, il faut le plugin correspondant et il faudra reintroduire cette configuration dans le `Jenkinsfile`. Dans l etat actuel, le pipeline n en depend plus.
 

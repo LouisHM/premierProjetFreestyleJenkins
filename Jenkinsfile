@@ -7,7 +7,7 @@ pipeline {
     NEXUS_REPOSITORY = 'raw-hosted'
     NEXUS_CREDENTIALS = 'nexus-credentials'
     APP_GROUP = 'fr.efrei.devops'
-    NODE_FALLBACK_PATH = '/opt/homebrew/bin:/usr/local/bin:/opt/homebrew/opt/node@22/bin:/usr/local/opt/node@22/bin:/opt/homebrew/opt/node@20/bin:/usr/local/opt/node@20/bin'
+    NODE_FALLBACK_PATH = '/opt/homebrew/opt/node@24/bin:/usr/local/opt/node@24/bin:/opt/homebrew/opt/node@22/bin:/usr/local/opt/node@22/bin:/opt/homebrew/opt/node@20/bin:/usr/local/opt/node@20/bin:/opt/homebrew/bin:/usr/local/bin'
   }
 
   stages {
@@ -37,10 +37,12 @@ pipeline {
             exit 127
           fi
 
+          echo "Node binary: $(command -v node)"
+          echo "npm binary: $(command -v npm)"
           echo "Node version: $(node -v)"
           echo "npm version: $(npm -v)"
 
-          node -e "const [major, minor] = process.versions.node.split('.').map(Number); const supported = (major === 20 && minor >= 19) || (major === 22 && minor >= 12); if (!supported) { console.error('ERROR: Node.js 20.19+ or 22.12+ is required for this project.'); process.exit(1); }"
+          node -e "const [major, minor] = process.versions.node.split('.').map(Number); const supported = (major === 20 && minor >= 19) || (major === 22 && minor >= 12) || major >= 24; if (!supported) { console.error('ERROR: Node.js 20.19+, 22.12+, or 24+ is required for this project. Node 23 is not supported.'); process.exit(1); }"
         '''
       }
     }
