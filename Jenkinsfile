@@ -106,6 +106,8 @@ pipeline {
                   exit 1
                 fi
 
+                SCANNER_HOME="${SCANNER_HOME:-}"
+
                 if [ -n "$SCANNER_HOME" ] && [ -x "$SCANNER_HOME/bin/sonar-scanner" ]; then
                   SCANNER_CMD="$SCANNER_HOME/bin/sonar-scanner"
                 elif command -v sonar-scanner >/dev/null 2>&1; then
