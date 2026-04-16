@@ -163,21 +163,30 @@ npm pack''',
 
     stage('Publish Nexus') {
       steps {
-        nexusArtifactUploader(
-          nexusVersion: 'nexus3',
-          protocol: 'http',
-          nexusUrl: "${NEXUS_URL}",
-          repository: "${NEXUS_REPOSITORY}",
+        withCredentials([usernamePassword(
           credentialsId: "${NEXUS_CREDENTIALS}",
-          groupId: "${APP_GROUP}",
-          version: "${env.APP_VERSION}",
-          artifacts: [[
-            artifactId: 'jenkins-ui-demo',
-            classifier: '',
-            file: "${env.PACKAGE_FILE}",
-            type: 'tgz'
-          ]]
-        )
+          usernameVariable: 'NEXUS_USER',
+          passwordVariable: 'NEXUS_PASSWORD'
+        )]) {
+          sh '''
+            set -eu
+
+            if ! command -v curl >/dev/null 2>&1; then
+              echo "ERROR: curl not found in PATH."
+              exit 127
+            fi
+
+            GROUP_PATH="$(printf '%s' "$APP_GROUP" | tr '.' '/')"
+            TARGET_URL="http://${NEXUS_URL}/repository/${NEXUS_REPOSITORY}/${GROUP_PATH}/${APP_VERSION}/${PACKAGE_FILE}"
+
+            echo "Uploading ${PACKAGE_FILE} to ${TARGET_URL}"
+
+            curl --fail --show-error --silent \
+              --user "${NEXUS_USER}:${NEXUS_PASSWORD}" \
+              --upload-file "${PACKAGE_FILE}" \
+              "${TARGET_URL}"
+          '''
+        }
       }
     }
   }
