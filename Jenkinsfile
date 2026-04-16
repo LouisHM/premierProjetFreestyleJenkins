@@ -182,7 +182,9 @@ npm pack''',
             echo "Uploading ${PACKAGE_FILE} to ${TARGET_URL}"
 
             curl --fail --show-error --silent \
+              --basic \
               --user "${NEXUS_USER}:${NEXUS_PASSWORD}" \
+              --header "Expect:" \
               --upload-file "${PACKAGE_FILE}" \
               "${TARGET_URL}"
           '''
