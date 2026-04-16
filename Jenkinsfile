@@ -127,6 +127,59 @@ pipeline {
       }
     }
 
+    stage('Quality Gate') {
+      steps {
+        withSonarQubeEnv("${SONAR_INSTANCE}") {
+          sh '''
+            set -eu
+            export PATH="$NODE_FALLBACK_PATH:$PATH"
+
+            if [ -n "${SONAR_AUTH_TOKEN:-}" ] && [ -z "${SONAR_TOKEN:-}" ]; then
+              export SONAR_TOKEN="$SONAR_AUTH_TOKEN"
+            fi
+
+            node scripts/wait-for-quality-gate.mjs
+          '''
+        }
+      }
+    }
+
+    stage('Package') {
+      steps {
+        script {
+          env.APP_VERSION = sh(
+            script: '''export PATH="$NODE_FALLBACK_PATH:$PATH"
+node -e "console.log(JSON.parse(require('fs').readFileSync('package.json','utf8')).version)"''',
+            returnStdout: true
+          ).trim()
+          env.PACKAGE_FILE = sh(
+            script: '''export PATH="$NODE_FALLBACK_PATH:$PATH"
+npm pack''',
+            returnStdout: true
+          ).trim()
+        }
+      }
+    }
+
+    stage('Publish Nexus') {
+      steps {
+        nexusArtifactUploader(
+          nexusVersion: 'nexus3',
+          protocol: 'http',
+          nexusUrl: "${NEXUS_URL}",
+          repository: "${NEXUS_REPOSITORY}",
+          credentialsId: "${NEXUS_CREDENTIALS}",
+          groupId: "${APP_GROUP}",
+          version: "${env.APP_VERSION}",
+          artifacts: [[
+            artifactId: 'jenkins-ui-demo',
+            classifier: '',
+            file: "${env.PACKAGE_FILE}",
+            type: 'tgz'
+          ]]
+        )
+      }
+    }
   }
 
   post {
