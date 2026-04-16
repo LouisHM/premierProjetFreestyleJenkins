@@ -85,10 +85,26 @@ pipeline {
           }
 
           withSonarQubeEnv("${SONAR_INSTANCE}") {
-            withEnv(["SCANNER_HOME=${scannerHome}"]) {
+            withEnv(["SCANNER_HOME=${scannerHome ?: ''}"]) {
               sh '''
                 set -eu
                 export PATH="$NODE_FALLBACK_PATH:$PATH"
+
+                if [ -z "${SONAR_HOST_URL:-}" ]; then
+                  echo "ERROR: SONAR_HOST_URL is not set."
+                  echo "Check the Jenkins SonarQube server configuration for '${SONAR_INSTANCE}'."
+                  exit 1
+                fi
+
+                if [ -n "${SONAR_AUTH_TOKEN:-}" ] && [ -z "${SONAR_TOKEN:-}" ]; then
+                  export SONAR_TOKEN="$SONAR_AUTH_TOKEN"
+                fi
+
+                if [ -z "${SONAR_TOKEN:-}" ]; then
+                  echo "ERROR: No SonarQube token was injected into the build."
+                  echo "Check the Jenkins SonarQube server configuration '${SONAR_INSTANCE}' and its credentials/token."
+                  exit 1
+                fi
 
                 if [ -n "$SCANNER_HOME" ] && [ -x "$SCANNER_HOME/bin/sonar-scanner" ]; then
                   SCANNER_CMD="$SCANNER_HOME/bin/sonar-scanner"
