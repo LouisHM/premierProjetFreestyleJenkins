@@ -203,5 +203,3 @@ Les parties suivantes sont fonctionnelles :
 - analyse SonarQube
 - validation de la Quality Gate
 - packaging
-
-La derniere etape a finaliser est la publication authentifiee dans Nexus via Jenkins.
